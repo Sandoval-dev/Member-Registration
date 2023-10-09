@@ -26,12 +26,27 @@ namespace MemberRegistiration.Business.Concrete.Managers
         [FluentValidationAspect(typeof(MemberValidator))]
         public void Add(Member member)
         {
-            if (_kpsService.ValidateUser(member)==false)
+            CheckIfMemberExits(member);
+
+            CheckIfUserValidFromKps(member);
+
+            _memberdal.Add(member);
+        }
+
+        private void CheckIfUserValidFromKps(Member member)
+        {
+            if (_kpsService.ValidateUser(member) == false)
             {
                 throw new Exception("Kullanıcı doğrulaması geçerli değil.");
             }
+        }
 
-            _memberdal.Add(member);
+        private void CheckIfMemberExits(Member member)
+        {
+            if ((_memberdal.Get(m => m.TcNo == member.TcNo) != null))
+            {
+                throw new Exception("Kullanıcı daha önce kayıt edilmiş.");
+            }
         }
     }
 }
